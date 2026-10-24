@@ -369,14 +369,21 @@
 
 .share-preview {
   margin: 0;
-  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-line;
-  color: var(--ink-soft);
+  overflow: hidden;
+}
+
+.share-preview img,
+.share-preview-placeholder {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1200 / 630;
+}
+
+.share-preview-placeholder {
+  background: var(--line);
 }
 
 .receipt-actions {

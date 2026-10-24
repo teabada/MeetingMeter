@@ -1,19 +1,54 @@
 import { useEffect, useState } from 'react'
 import { MeterPanel } from '../components/MeterPanel'
-import { copyText } from '../copyText'
 import { formatElapsed, formatWon } from '../meter/meter'
 import type { Receipt } from '../meter/receipt'
+import { copyReceipt, type CopyResult } from '../share/copyReceipt'
+import { CARD_HEIGHT, CARD_WIDTH, renderReceiptCard } from '../share/receiptCard'
 
 interface Props {
   receipt: Receipt
   onRestart: () => void
 }
 
-type CopyState = 'idle' | 'copied' | 'failed'
+const COPY_LABEL: Record<CopyResult | 'idle', string> = {
+  idle: '결과 복사해서 공유',
+  image: '이미지 복사했어요',
+  text: '글로 복사했어요',
+  failed: '복사하지 못했어요',
+}
+
+const COPY_ANNOUNCE: Record<CopyResult | 'idle', string> = {
+  idle: '',
+  image: '결과 카드 이미지를 클립보드에 복사했어요',
+  text: '이 브라우저는 이미지 복사를 지원하지 않아 결과를 글로 복사했어요',
+  failed: '복사하지 못했어요',
+}
 
 export function ReceiptScreen({ receipt, onRestart }: Props) {
-  const [copy, setCopy] = useState<CopyState>('idle')
+  const [copy, setCopy] = useState<CopyResult | 'idle'>('idle')
+  // 끝난 회의의 영수증은 바뀌지 않으므로 화면에 들어올 때 한 번만 그린다.
+  const [card] = useState(() => renderReceiptCard(receipt))
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const { item, count } = receipt.comparison.headline
+
+  useEffect(() => {
+    let url: string | null = null
+    let cancelled = false
+    card.then(
+      blob => {
+        if (cancelled) return
+        url = URL.createObjectURL(blob)
+        setPreviewUrl(url)
+      },
+      () => {
+        // 카드를 못 그리면 미리보기 없이 글 복사로 동작한다.
+      },
+    )
+    return () => {
+      cancelled = true
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [card])
 
   useEffect(() => {
     if (copy === 'idle') return
@@ -57,23 +92,29 @@ export function ReceiptScreen({ receipt, onRestart }: Props) {
         </dl>
       </section>
 
-      <p className="share-preview">{receipt.shareText}</p>
+      <figure className="share-preview">
+        {previewUrl ? (
+          <img src={previewUrl} width={CARD_WIDTH} height={CARD_HEIGHT} alt={receipt.shareText} />
+        ) : (
+          <div className="share-preview-placeholder" />
+        )}
+      </figure>
 
       <div className="spacer" />
       <div className="receipt-actions">
         <button
           type="button"
           className="primary-button"
-          onClick={async () => setCopy((await copyText(receipt.shareText)) ? 'copied' : 'failed')}
+          onClick={async () => setCopy(await copyReceipt(card, receipt.shareText))}
         >
-          {copy === 'copied' ? '복사했어요' : copy === 'failed' ? '복사하지 못했어요' : '결과 복사해서 공유'}
+          {COPY_LABEL[copy]}
         </button>
         <button type="button" className="secondary-button" onClick={onRestart}>
           다시 측정
         </button>
       </div>
       <p className="sr-only" aria-live="polite">
-        {copy === 'copied' ? '결과를 클립보드에 복사했어요' : copy === 'failed' ? '복사하지 못했어요' : ''}
+        {COPY_ANNOUNCE[copy]}
       </p>
       <p className="footnote">비교 품목 가격은 재미로 잡은 대략적인 값이에요</p>
     </main>

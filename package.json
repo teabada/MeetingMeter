@@ -1,7 +1,7 @@
 {
   "name": "meetingmeter",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,9 +9,13 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:ext": "tsc -b && vite build --mode extension",
+    "zip:ext": "npm run build:ext && cd dist-extension && rm -f ../meeting-meter-extension.zip && zip -qr ../meeting-meter-extension.zip ."
   },
   "dependencies": {
+    "@fontsource/ibm-plex-sans-kr": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

@@ -13,12 +13,11 @@ npm run lint
 
 ## 웹 배포
 
-`npm run build` 결과물(`dist/`)은 정적 파일이라 어디에나 올릴 수 있다. 경로가 상대 경로라 하위 경로에서도 열린다.
+[Vercel](https://vercel.com)에 GitHub 저장소를 연결해 배포한다. `main`에 push하면 운영 주소에, 다른 브랜치는 미리보기 주소에 자동으로 배포된다.
 
-- **GitHub Pages**: `main`에 push하면 [.github/workflows/deploy.yml](.github/workflows/deploy.yml)이 테스트 후 배포한다. 저장소 Settings → Pages → Source를 "GitHub Actions"로 한 번 바꿔둔다.
-- **Vercel / Netlify / Cloudflare Pages**: 저장소를 연결하고 빌드 명령 `npm run build`, 출력 폴더 `dist`.
+처음 연결할 때: Add New → Project → 이 저장소 Import. Framework Preset은 Vite, 빌드 명령 `npm run build`, 출력 폴더 `dist`(자동으로 채워진다).
 
-화면 꺼짐 방지와 이미지 복사는 HTTPS에서만 동작한다(위 서비스는 모두 HTTPS).
+`dist/`는 상대 경로로 된 정적 파일이라 다른 정적 호스팅(Netlify, Cloudflare Pages 등)에도 그대로 올릴 수 있다. 화면 꺼짐 방지와 이미지 복사는 HTTPS에서만 동작한다.
 
 ## 크롬 확장 (사이드 패널)
 
